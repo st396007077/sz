@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>订单管理后台</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+padding: 20px 10px;
+background:#f5f7fa;
+font-family:Arial;
+max-width: 100vw;
+overflow-x: hidden;
+}
+.login{
+max-width:400px;
+margin:50px auto;
+background:white;
+padding:30px;
+border-radius:10px;
+box-shadow:0 2px 10px #00000010;
+width: 90%;
+}
+.login input{
+width:100%;padding:12px;margin:10px 0;
+border:1px solid #ddd;border-radius:5px;
+}
+.login button{
+width:100%;padding:12px;background:#007bff;
+color:white;border:none;border-radius:5px;
+}
+.container{
+display:none;max-width:none;width:98%;margin:0 auto;
+background:white;padding:20px 15px;border-radius:10px;
+box-shadow:0 2px 10px #00000010;
+}
+h1{margin-bottom:5px;text-align:center;font-size:20px;}
+.status-desc {
+text-align:left;font-size:14px;color:#333;margin-bottom:8px;
+padding-left:5px;line-height:1.6;
+}
+.color-tag {
+display:inline-block;width:12px;height:12px;border-radius:2px;
+margin-right:5px;vertical-align:middle;
+}
+.tag-white { background:#fff; border:1px solid #ddd; }
+.tag-blue { background:#e6f7ff; }
+.tag-red { background:#fff2f0; }
+.db-modify-desc {
+text-align:left;font-size:13px;color:#666;margin-bottom:15px;
+padding-left:5px;line-height:1.5;
+}
+.search-tools{
+display:flex;gap:10px;margin-bottom:15px;
+flex-wrap:wrap;align-items:center;
+}
+.search-tools input{
+padding:8px 10px;border:1px solid #ddd;
+border-radius:5px;width:200px;
+}
+.search-tools button{
+padding:8px 16px;background:#007bff;
+color:white;border:none;border-radius:5px;cursor:pointer;
+}
+.tools{
+display:flex;gap:8px;margin-bottom:15px;
+align-items:center;justify-content:space-between;flex-wrap:wrap;
+}
+button{
+padding:8px 16px;background:#007bff;
+color:white;border:none;border-radius:5px;cursor:pointer;
+}
+.refresh-amount-btn {
+background:#28a745;padding:6px 10px;font-size:12px;margin-right:5px;
+}
+button.del-btn{ background:#dc3545;padding:6px 10px;font-size:12px; }
+button.exit-btn{background:#6c757d}
+.table-container{ overflow-x:auto;margin:10px 0; }
+table{ width:100%;min-width:1700px;border-collapse:collapse; }
+th,td{
+border:1px solid #ddd;padding:8px 6px;
+text-align:center;white-space:nowrap;font-size:13px;
+}
+th{background:#f8f9fa}
+.id-col{width:80px}
+.time-col{width:150px}
+.name-col{width:80px}
+.phone-col{width:110px}
+.paytype-col{width:100px}
+.pay-record-col{width:250px;}
+.pay-screenshot-col{width:220px;}
+.money-col{width:80px}
+.oper-col{width:140px}
+.class-col{width:120px}
+.pay-record {
+white-space:pre-line;text-align:left;padding:5px;line-height:1.4;
+}
+.pay-img-list { display:flex;flex-wrap:wrap;gap:4px;justify-content:center; }
+.pay-img-item {
+width:40px;height:40px;object-fit:cover;
+border-radius:4px;cursor:pointer;border:1px solid #ddd;
+}
+.row-modify { background-color:#fff2f0 !important }
+.row-multi-submit { background-color:#e6f7ff !important }
+.row-first-submit { background-color:#fff !important }
+
+/* 弹窗优化（大弹窗） */
+.modal {
+position:fixed;top:0;left:0;width:100%;height:100%;
+background:rgba(0,0,0,0.85);display:none;
+justify-content:center;align-items:center;z-index:9999;
+padding:15px;
+}
+.modal-content {
+background:white;padding:30px;border-radius:12px;
+width:100%;max-width:900px;
+text-align:center;position:relative;
+max-height:95vh;overflow-y:auto;
+}
+.modal-img {
+max-width:100%;max-height:85vh;
+object-fit:contain;border-radius:8px;
+}
+.modal-close {
+position:fixed;top:20px;right:25px;
+font-size:36px;color:#fff;
+cursor:pointer;background:none;border:none;
+z-index:10000;
+}
+.modal-download {
+margin-top:15px;padding:12px 24px;
+background:#28a745;color:white;
+border:none;border-radius:8px;
+font-size:16px;cursor:pointer;
+}
+.modal-btn {
+margin-top:20px;padding:14px 30px;
+background:#007bff;color:white;
+border:none;border-radius:8px;
+font-size:16px;cursor:pointer;
+}
+#resultModal .modal-content {
+max-width:550px;padding:40px 30px;
+}
+#modalTitle {font-size:20px;margin-bottom:10px}
+#modalMsg {font-size:15px;line-height:1.7;margin:10px 0 20px}
+</style>
+</head>
+
+<body>
+<div class="login" id="loginBox">
+<h2>后台登录</h2>
+<input type="password" id="pwd" placeholder="请输入管理密码">
+<button onclick="login()">登录</button>
+</div>
+
+<div class="container" id="adminBox">
+<h1>订单管理</h1>
+<div class="status-desc">
+<span class="color-tag tag-white"></span>白色：首次提交　
+<span class="color-tag tag-blue"></span>蓝色：多次提交/追加　
+<span class="color-tag tag-red"></span>红色：手动修改
+</div>
+<div class="db-modify-desc">
+1. 数据库修改班次后已自动识别标红<br>2. 首次提交白色，追加/多次提交蓝色
+</div>
+
+<div class="search-tools">
+<input type="text" id="searchName" placeholder="姓名查询">
+<input type="text" id="searchPhone" placeholder="电话查询">
+<button onclick="searchOrders()">查询</button>
+<button onclick="resetSearch()">重置</button>
+</div>
+
+<div class="tools">
+<div style="display:flex;gap:8px;">
+<button onclick="load()">刷新</button>
+<button onclick="exportExcel()">导出Excel</button>
+</div>
+<button class="exit-btn" onclick="logout()">退出</button>
+</div>
+
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th class="id-col">订单ID</th>
+<th class="name-col">姓名</th>
+<th class="phone-col">电话</th>
+<th class="paytype-col">支付方式</th>
+<th class="pay-record-col">支付记录</th>
+<th class="pay-screenshot-col">付款信息</th>
+<th class="money-col">总金额</th>
+<th class="time-col">最后提交时间</th>
+<th class="class-col">4月11日早送</th>
+<th class="class-col">4月11日晚接</th>
+<th class="class-col">4月12日早送</th>
+<th class="class-col">4月12日晚接</th>
+<th class="class-col">4月11日中午</th>
+<th class="class-col">4月12日中午</th>
+<th class="oper-col">操作</th>
+</tr>
+</thead>
+<tbody id="list"></tbody>
+</table>
+</div>
+</div>
+
+<div class="modal" id="imgModal">
+<div class="modal-content">
+<button class="modal-close" onclick="closeImgModal()">&times;</button>
+<img class="modal-img" id="previewImg" src="">
+<button class="modal-download" id="downloadBtn">下载图片</button>
+</div>
+</div>
+
+<div class="modal" id="resultModal">
+<div class="modal-content">
+<h3 id="modalTitle">操作结果</h3>
+<p id="modalMsg"></p>
+<button class="modal-btn" onclick="closeModal()">确定</button>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script>
+const SERVER_URL = "https://zikaocar-server.onrender.com";
+let ADMIN_PWD = "";
+let orderData = [], filteredOrderData = [];
+
+function login(){
+  const val = document.getElementById('pwd').value;
+  if(!val){ alert('请输入密码'); return; }
+  ADMIN_PWD = val;
+  checkLogin();
+}
+
+async function checkLogin(){
+  try {
+    const res = await fetch(`${SERVER_URL}/api/getAllOrders?pwd=${ADMIN_PWD}`);
+    const d = await res.json();
+    if(d.code !== 0){ alert('密码错误'); return; }
+    document.getElementById('loginBox').style.display = 'none';
+    document.getElementById('adminBox').style.display = 'block';
+    load();
+  }catch(e){ alert('登录失败'); }
+}
+
+function logout(){
+  if(confirm('退出？')){
+    ADMIN_PWD = "";
+    location.reload();
+  }
+}
+
+async function load() {
+  try {
+    const res = await fetch(`${SERVER_URL}/api/getAllOrders?pwd=${ADMIN_PWD}`);
+    const data = await res.json();
+    if(data.code !==0) { showModal('无权限','请重新登录'); logout(); return; }
+    orderData = data.data;
+    filteredOrderData = [...orderData];
+    renderTable();
+  } catch (err) {
+    showModal('错误','加载失败');
+  }
+}
+
+function openImage(url) {
+  document.getElementById('previewImg').src = url;
+  document.getElementById('imgModal').style.display = 'flex';
+  document.getElementById('downloadBtn').onclick = () => {
+    const a = document.createElement('a');
+    a.href = url; a.download = '截图'; a.click();
+  };
+}
+function closeImgModal() {
+  document.getElementById('imgModal').style.display = 'none';
+}
+
+function renderTable() {
+  const list = document.getElementById('list');
+  list.innerHTML = '';
+  if(!filteredOrderData.length) {
+    list.innerHTML = '<tr><td colspan="15">暂无数据</td></tr>';
+    return;
+  }
+  filteredOrderData.forEach(order => {
+    const tr = document.createElement('tr');
+    if (order.isManuallyModified) tr.className = 'row-modify';
+    else if (order.isMultiSubmit) tr.className = 'row-multi-submit';
+    else tr.className = 'row-first-submit';
+
+    const getClassInfo = (name) => {
+      const item = order.carList.find(i => i.name === name);
+      if(!item) return '-';
+      if(item.school) return item.school;
+      if(item.from && item.to) return `${item.from}→${item.to}`;
+      return '-';
+    };
+
+    const formatPaymentRecords = () => {
+      if(!order.paymentRecords?.length) return '-';
+      return order.paymentRecords.map((r,i)=>`第${i+1}笔：${r.payType} ${r.amount}元 ${r.time}`).join('\n');
+    };
+
+    const renderScreenshots = () => {
+      const arr = order.payScreenshots || [];
+      if(!arr.length) return '<span style="color:#999">无截图</span>';
+      return `<div class="pay-img-list">${arr.map(u=>`<img src="${u}" class="pay-img-item" onclick="openImage('${u}')">`).join('')}</div>`;
+    };
+
+    tr.innerHTML = `
+      <td>${order.orderId || '-'}</td>
+      <td>${order.userName || '-'}</td>
+      <td>${order.userPhone ? order.userPhone.replace(/(\d{3})\d{4}(\d{4})/,'$1****$2') : '-'}</td>
+      <td>${order.payType || '-'}</td>
+      <td class="pay-record">${formatPaymentRecords()}</td>
+      <td>${renderScreenshots()}</td>
+      <td>${order.total || 0}元</td>
+      <td>${order.createTime || '-'}</td>
+      <td>${getClassInfo('4月11日早送')}</td>
+      <td>${getClassInfo('4月11日晚接')}</td>
+      <td>${getClassInfo('4月12日早送')}</td>
+      <td>${getClassInfo('4月12日晚接')}</td>
+      <td>${getClassInfo('4月11日中午考点更换')}</td>
+      <td>${getClassInfo('4月12日中午考点更换')}</td>
+      <td>
+        <button class="refresh-amount-btn" onclick="refreshAmount('${order.orderId}')">刷新金额</button>
+        <button class="del-btn" onclick="deleteOrder('${order._id}')">删除</button>
+      </td>
+    `;
+    list.appendChild(tr);
+  });
+}
+
+async function refreshAmount(orderId) {
+  if(!confirm('确定刷新？')) return;
+  try {
+    const r = await fetch(`${SERVER_URL}/api/recalculateAmount`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ pwd:ADMIN_PWD, orderId })
+    });
+    const d = await r.json();
+    showModal('结果',d.msg);
+    if(d.code===0) load();
+  }catch(e){ showModal('错误','失败'); }
+}
+
+async function deleteOrder(id) {
+  if(!confirm('确定删除？')) return;
+  try {
+    const r = await fetch(`${SERVER_URL}/api/deleteOrder`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ pwd:ADMIN_PWD, id })
+    });
+    const d = await r.json();
+    showModal('结果',d.msg);
+    if(d.code===0) load();
+  }catch(e){ showModal('错误','失败'); }
+}
+
+function searchOrders() {
+  const name = document.getElementById('searchName').value.trim();
+  const phone = document.getElementById('searchPhone').value.trim();
+  filteredOrderData = orderData.filter(o=>
+    (o.userName||'').includes(name) && (o.userPhone||'').includes(phone)
+  );
+  renderTable();
+}
+
+function resetSearch() {
+  document.getElementById('searchName').value = '';
+  document.getElementById('searchPhone').value = '';
+  filteredOrderData = [...orderData];
+  renderTable();
+}
+
+// ======================
+// ✅ 优化：导出Excel 包含 付款截图链接
+// ======================
+function exportExcel() {
+  if(!filteredOrderData.length) { showModal('提示','暂无数据'); return; }
+  const excelData = filteredOrderData.map(o => {
+    const getInfo = (n) => {
+      const i = o.carList.find(x => x.name === n);
+      if(!i) return '-';
+      if(i.school) return i.school;
+      if(i.from && i.to) return i.from+'→'+i.to;
+      return '-';
+    };
+    // 支付记录：每笔用 \n 换行
+    const payRecords = o.paymentRecords?.length
+      ? o.paymentRecords.map((r,i)=>`第${i+1}笔：${r.payType} ${r.amount}元 ${r.time}`).join('\n')
+      : '-';
+
+    // 付款截图链接：多张用 \n 换行
+    const screenshotUrls = o.payScreenshots?.length
+      ? o.payScreenshots.join('\n')
+      : '无截图';
+
+    return {
+      '订单ID': o.orderId,
+      '姓名': o.userName,
+      '电话': o.userPhone,
+      '支付方式': o.payType,
+      '支付记录': payRecords,  // 已改为 \n 换行
+      '付款截图链接': screenshotUrls,
+      '总金额': o.total+'元',
+      '提交时间': o.createTime,
+      '4月11日早送': getInfo('4月11日早送'),
+      '4月11日晚接': getInfo('4月11日晚接'),
+      '4月12日早送': getInfo('4月12日早送'),
+      '4月12日晚接': getInfo('4月12日晚接'),
+      '4月11日中午': getInfo('4月11日中午考点更换'),
+      '4月12日中午': getInfo('4月12日中午考点更换')
+    };
+  });
+
+  // 生成工作表
+  const ws = XLSX.utils.json_to_sheet(excelData);
+
+  // ✅ 关键：给所有单元格设置自动换行样式
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  const wrapStyle = {
+    alignment: {
+      wrapText: true,  // 开启自动换行
+      vertical: 'top'  // 顶部对齐，更美观
+    }
+  };
+  for (let row = range.s.r; row <= range.e.r; row++) {
+    for (let col = range.s.c; col <= range.e.c; col++) {
+      const cellAddr = XLSX.utils.encode_cell({ r: row, c: col });
+      if (ws[cellAddr]) {
+        ws[cellAddr].s = wrapStyle;
+      }
+    }
+  }
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '订单');
+  XLSX.writeFile(wb, `订单_${new Date().toLocaleDateString()}.xlsx`);
+  showModal('成功','导出完成');
+}
+
+function showModal(t,m){
+  document.getElementById('modalTitle').innerText = t;
+  document.getElementById('modalMsg').innerText = m;
+  document.getElementById('resultModal').style.display = 'flex';
+}
+function closeModal(){
+  document.getElementById('resultModal').style.display = 'none';
+}
+</script>
+</body>
+</html>
