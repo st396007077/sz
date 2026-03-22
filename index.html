@@ -957,6 +957,9 @@ function backToQRModal() {
     saveFormData();
 }
 
+// ==============================================
+// ✅ 核心修复：截图上传改为Base64格式传递
+// ==============================================
 async function submitOrderSecure() {
     if (isSubmitting) { showAlert('正在提交，请勿重复'); return; }
     if (!hasUploadedScreenshot) { showAlert('请上传截图'); return; }
@@ -966,8 +969,13 @@ async function submitOrderSecure() {
         const phone = document.getElementById('userPhone').value.trim();
         const total = calcTotal();
         const createTime = getCurrentTime();
-        if (!validateName(name) || !validatePhone(phone)) { showAlert('信息不正确'); isSubmitting=false; return; }
+        if (!validateName(name) || !validatePhone(phone)) { 
+            showAlert('信息不正确'); 
+            isSubmitting=false; 
+            return; 
+        }
 
+        // 组装车次信息
         let carList = [];
         document.querySelectorAll('.car-check:checked').forEach(item => {
             const t = item.dataset.type;
@@ -976,30 +984,68 @@ async function submitOrderSecure() {
             const sels = document.getElementById(`school${t}`).querySelectorAll('select');
             let info = { name, price };
             if (sels.length ===1) info.school = sels[0].value.trim();
-            if (sels.length ===2) { info.from = sels[0].value.trim(); info.to = sels[1].value.trim(); }
+            if (sels.length ===2) { 
+                info.from = sels[0].value.trim(); 
+                info.to = sels[1].value.trim(); 
+            }
             carList.push(info);
         });
 
-        const orderRes = await fetch(SERVER_URL + "/api/submitOrder", {
+        // 1. 提交订单（原有逻辑不变）
+        const orderRes = await fetch(`${SERVER_URL}/api/submitOrder`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userName:name, userPhone:phone, total, carList, payType:selectedPayType, createTime })
+            body: JSON.stringify({ 
+                userName: name, 
+                userPhone: phone, 
+                total, 
+                carList, 
+                payType: selectedPayType, 
+                createTime 
+            })
         });
         const orderData = await orderRes.json();
-        if (orderData.code !==0) { showAlert("提交失败："+orderData.msg); isSubmitting=false; return; }
+        if (orderData.code !== 0) { 
+            showAlert("提交失败：" + orderData.msg); 
+            isSubmitting = false; 
+            return; 
+        }
 
-        const formData = new FormData();
-        formData.append('orderId', orderData.orderId);
-        screenshotFiles.forEach(f => formData.append('screenshots', f));
-        const uploadRes = await fetch(SERVER_URL + "/api/uploadScreenshot", { method: "POST", body: formData });
+        // ✅ 核心修改：精准提示 - 区分首次提交/合并提交
+        if (orderData.msg.includes('合并到原有订单')) {
+            showAlert("提交成功！您已提交过信息，本次内容已合并更新到原有订单中");
+        } else {
+            showAlert("提交成功！您的订单已创建");
+        }
+
+        // 2. 将截图文件转为Base64数组（核心修改）
+        const screenshotBase64List = [];
+        for (const file of screenshotFiles) {
+            const base64 = await new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.readAsDataURL(file);
+            });
+            screenshotBase64List.push(base64);
+        }
+
+        // 3. 上传Base64格式的截图（适配后端接口）
+        const uploadRes = await fetch(`${SERVER_URL}/api/uploadScreenshot`, { 
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+                orderId: orderData.orderId,
+                screenshots: screenshotBase64List 
+            })
+        });
         const uploadData = await uploadRes.json();
-        if (uploadData.code !==0) {
-            await fetch(`${SERVER_URL}/api/deleteOrder?orderId=${orderData.orderId}`, { method:"DELETE" });
-            showAlert("上传失败，订单已撤销");
-            isSubmitting=false;
+        if (uploadData.code !== 0) {
+            showAlert("截图上传失败：" + uploadData.msg);
+            isSubmitting = false;
             return;
         }
 
+        // 提交成功，展示结果
         document.getElementById('screenshotModal').style.display = 'none';
         let info = `
 <strong>乘车人：</strong>${name}<br>
@@ -1019,11 +1065,16 @@ async function submitOrderSecure() {
         });
         document.getElementById('successInfo').innerHTML = info;
         document.getElementById('successModal').style.display = 'flex';
+        
+        // 清空缓存，重新加载历史（禁用已选班次）
         clearFormCache();
         loadUserHistory();
     } catch (e) {
-        showAlert("提交失败：网络异常");
-    } finally { isSubmitting = false; }
+        console.error('提交失败：', e);
+        showAlert("提交失败：网络异常，请重试");
+    } finally { 
+        isSubmitting = false; 
+    }
 }
 
 function closeSuccessModal(){
@@ -1049,7 +1100,10 @@ function searchPayInfo(){
     .then(d=>{
         if(d.code!==0) return;
         const list = d.data.filter(i=>i.userPhone === p);
-        if(list.length ===0) { document.getElementById('queryResult').innerHTML='<span style="color:red">未找到交费信息</span>'; return; }
+        if(list.length ===0) { 
+            document.getElementById('queryResult').innerHTML='<span style="color:red">未找到交费信息</span>'; 
+            return; 
+        }
         let html = '';
         list.forEach((item,idx)=>{
             html += `<div style="border-bottom:1px solid #eee;padding:10px 0">`;
@@ -1066,6 +1120,9 @@ function searchPayInfo(){
             html += `</div>`;
         });
         document.getElementById('queryResult').innerHTML = html;
+    })
+    .catch(e => {
+        showAlert('查询失败：网络异常');
     });
 }
 </script>
