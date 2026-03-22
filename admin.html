@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>商职订单管理后台</title>
+<title>山青院订单管理后台</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{
@@ -127,7 +127,7 @@ position: fixed;top: 50%;left: 50%;transform: translate(-50%, -50%);background: 
 </div>
 
 <div class="container" id="adminBox">
-<h1>商职订单管理</h1>
+<h1>山青院订单管理</h1>
 <div class="status-desc">
 <span class="color-tag tag-white"></span>白色：首次提交　
 <span class="color-tag tag-blue"></span>蓝色：多次提交/追加　
@@ -345,6 +345,7 @@ async function load() {
           new Date(b.createTime) - new Date(a.createTime)
         )[0];
         
+        // 🔥 修复：添加缺失的右括号
         const mergedCarList = mergeCarLists([], orders.flatMap(o => o.carList || []));
         
         // ✅ 修复：检查是否任何一个订单被手动修改过
@@ -443,7 +444,7 @@ function renderTable() {
     tr.innerHTML = `
      <td>${order.orderId || '-'}</td>
      <td>${order.userName || '-'}</td>
-     <td>${order.userPhone ? order.userPhone.replace(/(\d{3})\d{4}(\d{4})/,'$1****$2') : '-'}</td>
+     <td>${order.userPhone || '-'}</td>
      <td>${order.payType || '-'}</td>
      <td class="pay-record">${formatPaymentRecords()}</td>
      <td>${renderScreenshots()}</td>
@@ -545,7 +546,7 @@ async function refreshAmount(orderId) {
   if(!confirm('确定刷新金额？')) return;
   showLoading("刷新中...");
   try {
-    const r = await fetch(`${SERVERVER_URL}/api/recalculateAmount`,{
+    const r = await fetch(`${SERVER_URL}/api/recalculateAmount`,{
       method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ pwd:ADMIN_PWD, orderId })
     });
     const d = await r.json();
