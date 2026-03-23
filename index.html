@@ -611,10 +611,10 @@ font-size: 15px;
 <h3>提交支付截图</h3>
 <p style="margin:15px 0;">请上传支付成功的截图凭证，点击"确认提交"后等待几秒自动显示班次信息</p>
 
-<!-- 修复3：添加示例图 -->
+<!-- 新增：示例图区域（带点击放大） -->
 <div id="exampleImageContainer" style="margin: 15px 0; text-align: center;">
-  <p style="font-size: 14px; color: #666; margin-bottom: 5px;">示例样图</p>
-  <img id="exampleImage" src="" style="max-width: 200px; max-height: 200px; border-radius: 6px; border: 1px solid #ddd;">
+  <p style="font-size: 14px; color: #666; margin-bottom: 5px; font-weight: bold;">示例样图</p>
+  <img id="exampleImage" class="preview-img" onclick="openImgZoom(this.src)" style="max-width: 220px; max-height: 220px; cursor: zoom-in;" src="">
 </div>
 
 <div class="preview-container" id="previewContainer"></div>
@@ -790,6 +790,13 @@ function loadFormData() {
         if (data.openModal === 'screenshotModal') {
             document.getElementById('qrModal').style.display = 'none';
             document.getElementById('screenshotModal').style.display = 'flex';
+            // 新增：刷新/重进时自动设置示例图
+            const exampleImage = document.getElementById('exampleImage');
+            if (selectedPayType === '微信') {
+                exampleImage.src = 'https://st396007077.github.io/sz/images/WXFK.jpg';
+            } else if (selectedPayType === '支付宝') {
+                exampleImage.src = 'https://st396007077.github.io/sz/images/ZFBFK.jpg';
+            }
         }
     }, 200);
 }
@@ -1028,7 +1035,7 @@ function openScreenshotModal() {
     document.getElementById('qrModal').style.display = 'none';
     document.getElementById('screenshotModal').style.display = 'flex';
     
-    // 修复3：设置示例图
+    // 设置示例图
     const exampleImage = document.getElementById('exampleImage');
     if (selectedPayType === '微信') {
         exampleImage.src = 'https://st396007077.github.io/sz/images/WXFK.jpg';
@@ -1254,7 +1261,7 @@ function searchPayInfo(){
         const list = d.data.filter(i=>i.userPhone === p);
         if(list.length ===0) { 
             document.getElementById('queryResult').innerHTML='<span style="color:red">未找到交费信息</span>'; 
-            return; 
+            return;
         }
         let html = '';
         list.forEach((item,idx)=>{
