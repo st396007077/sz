@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
 <title>商职自考本科考试专车自助订阅</title>
 <style>
-/* 样式部分保持不变，与您提供的完全一致 */
+/* 样式部分保持不变，与您提供的完全一致 + 图片优化样式 */
 * {
 margin: 0;
 padding: 0;
@@ -19,6 +19,17 @@ background-color: #f5f7fa;
 padding: 10px;
 margin: 0;
 overflow-x: hidden;
+}
+
+/* 🔥 图片加载优化：淡入效果 + 占位背景 */
+img {
+  transition: opacity 0.3s ease;
+  opacity: 0;
+  background: #f5f7fa;
+  border-radius: 8px;
+}
+img.loaded {
+  opacity: 1;
 }
 
 .query-btn {
@@ -621,7 +632,10 @@ font-size: 15px;
 <div class="modal" id="qrModal">
 <div class="modal-content">
 <h3 id="qrTitle">微信收款码</h3>
-<img class="qrcode-img" id="qrImg" src="">
+<!-- 🔥 优化：懒加载 + 错误兜底 + 加载完成动画 -->
+<img class="qrcode-img" id="qrImg" src="" loading="lazy" 
+onload="this.classList.add('loaded')" 
+onerror="this.src='https://picsum.photos/280/280'">
 <p class="pay-tip" id="payTip">请保存二维码到微信扫码完成支付</p>
 <div class="red-bg-tip">【支付完成后需要返回页面点击"已完成支付"，提交支付截图才能提交乘坐信息！！！】</div>
 
@@ -638,10 +652,12 @@ font-size: 15px;
 <h3>提交支付截图</h3>
 <p style="margin:15px 0;">请上传支付成功的截图凭证，点击"确认提交"后等待几秒自动显示班次信息</p>
 
-<!-- 支付示例图（新增） -->
+<!-- 支付示例图（优化） -->
 <div class="example-img-container">
   <p class="example-text">示例样图</p>
-  <img id="payExampleImg" class="example-img" onclick="openImgZoom(this.src)" alt="支付截图示例">
+  <img id="payExampleImg" class="example-img" onclick="openImgZoom(this.src)" alt="支付截图示例"
+  loading="lazy" onload="this.classList.add('loaded')" 
+  onerror="this.src='https://picsum.photos/220/220'">
 </div>
 
 <div class="preview-container" id="previewContainer"></div>
@@ -661,7 +677,7 @@ font-size: 15px;
 
 <!-- 图片放大弹窗 -->
 <div class="img-zoom-modal" id="imgZoomModal" onclick="closeImgZoom()">
-<img id="imgZoomContent" src="">
+<img id="imgZoomContent" src="" onload="this.classList.add('loaded')">
 </div>
 
 <!-- 成功弹窗 -->
@@ -695,7 +711,7 @@ font-size: 15px;
 const SERVER_URL = "https://szzikaocar-server.onrender.com";
 let selectedPayType = '';
 let existedCarNames = [];
-let existedCarList = []; // 🔥 新增：存储历史订单的完整班次信息
+let existedCarList = [];
 let hasUploadedScreenshot = false;
 let screenshotFiles = [];
 let isSubmitting = false;
@@ -704,6 +720,20 @@ const FIXED_CAR_ORDER = [
 '4月11日早送','4月11日晚接','4月12日早送','4月12日晚接',
 '4月11日中午考点更换','4月12日中午考点更换'
 ];
+
+// 🔥 预加载关键图片：页面打开就缓存收款码，点击时秒显示
+function preloadImages() {
+  const imgs = [
+    'https://st396007077.github.io/sz/images/WX.png',
+    'https://st396007077.github.io/sz/images/ZFB.jpg',
+    'https://st396007077.github.io/sz/images/WXFK.jpg',
+    'https://st396007077.github.io/sz/images/ZFBFK.jpg'
+  ];
+  imgs.forEach(src => {
+    const img = new Image();
+    img.src = src;
+  });
+}
 
 // ====================== 新增：根据支付方式更新示例图 ======================
 function updatePayExampleImg() {
@@ -715,22 +745,21 @@ function updatePayExampleImg() {
   } else if (selectedPayType === '微信') {
     exampleImg.src = 'https://st396007077.github.io/sz/images/WXFK.jpg';
   } else {
-    // 默认显示支付宝示例图
     exampleImg.src = 'https://st396007077.github.io/sz/images/ZFBFK.jpg';
   }
 }
   
 // 学校价格配置
 const SCHOOL_PRICE = {
-  '绣水中学': 15,      // 绣水中学价格：15元
-  '章丘实验小学': 15,      // 章丘实验小学价格：15元
-  '章丘实验中学': 15,      // 章丘实验中学价格：15元
-  '章丘第二实验中学': 15,  // 章丘第二实验中学价格：15元
-  '章丘鲁能实验小学': 15,  // 章丘鲁能实验小学价格：15元
-  '中等职业学校': 15,   // 中等职业学校价格：15元
-  '济南六里山小学': 17,   // 济南六里山小学价格：17元
-  '济南槐荫中学': 17,   // 济南槐荫中学价格：17元
-  '济南育贤中学': 17,   // 济南育贤中学价格：17元
+  '绣水中学': 15,
+  '章丘实验小学': 15,
+  '章丘实验中学': 15,
+  '章丘第二实验中学': 15,
+  '章丘鲁能实验小学': 15,
+  '中等职业学校': 15,
+  '济南六里山小学': 17,
+  '济南槐荫中学': 17,
+  '济南育贤中学': 17,
 };
 
 // 选择学校后，只隐藏当前项的红色错误
@@ -793,13 +822,9 @@ function loadFormData() {
     calcTotal();
     saveFormData();
 
-    // ==============================================
-    // ✅ 核心优化：页面加载时自动查询已购班次
-    // ==============================================
     const name = data.userName || '';
     const phone = data.userPhone || '';
     if (name && phone && validateName(name) && validatePhone(phone)) {
-        // 直接自动加载历史，禁用已购班次
         loadUserHistory();
     }
 
@@ -832,7 +857,7 @@ function loadFormData() {
         if (data.openModal === 'screenshotModal') {
             document.getElementById('qrModal').style.display = 'none';
             document.getElementById('screenshotModal').style.display = 'flex';
-            updatePayExampleImg(); // 刷新页面加载缓存时更新示例图
+            updatePayExampleImg();
         }
     }, 200);
 }
@@ -850,6 +875,7 @@ function onCarChange() {
 
 window.addEventListener('DOMContentLoaded', () => {
     loadFormData();
+    preloadImages(); // 🔥 页面加载完成预加载图片
     document.querySelectorAll('.car-check').forEach(i => {
         i.addEventListener('change', onCarChange.bind(i));
     });
@@ -949,13 +975,13 @@ async function loadUserHistory() {
         const res = await fetch(`${SERVER_URL}/api/queryOrder?userName=${encodeURIComponent(name)}`);
         const data = await res.json();
         existedCarNames = [];
-        existedCarList = []; // 🔥 重置历史班次列表
+        existedCarList = [];
         
         if(data.code ===0 && data.data.length>0) {
             const u = data.data.find(item=>item.userPhone === phone);
             if(u) {
                 existedCarNames = u.carList.map(i=>i.name);
-                existedCarList = u.carList; // 🔥 保存完整的班次信息
+                existedCarList = u.carList;
             }
         }
         document.querySelectorAll('.car-check').forEach(box => {
@@ -994,23 +1020,17 @@ function checkSchoolSelected(){
 function calcTotal(){
   let total = 0;
   
-  // 遍历所有选中的班次
   document.querySelectorAll('.car-check:checked').forEach(item => {
     const type = item.dataset.type;
     const name = item.dataset.name;
     const schoolSelect = document.getElementById(`school${type}`);
     
     if (schoolSelect) {
-      // 获取学校选择下拉框
       const schoolSelectElements = schoolSelect.querySelectorAll('select');
       
-      // 判断班次类型
       if (type === '5' || type === '6') {
-        // 中午考点更换 - 固定1元
         total += 1;
       } else {
-        // 早送/晚接 - 根据学校计算价格
-        // 只有一个下拉框的情况
         if (schoolSelectElements.length === 1) {
           const school = schoolSelectElements[0].value;
           if (school && SCHOOL_PRICE[school]) {
@@ -1070,6 +1090,8 @@ function openScreenshotModal() {
     document.getElementById('previewContainer').innerHTML = '';
     document.getElementById('qrModal').style.display = 'none';
     document.getElementById('screenshotModal').style.display = 'flex';
+
+    updatePayExampleImg();
     
     saveFormData();
 }
@@ -1077,13 +1099,10 @@ function openScreenshotModal() {
 function backToQRModal() {
     document.getElementById('screenshotModal').style.display = 'none';
     document.getElementById('qrModal').style.display = 'flex';
-    updatePayExampleImg(); // 打开弹窗时更新示例图
+    updatePayExampleImg();
     saveFormData();
 }
 
-// ==============================================
-// ✅ 核心修复：截图上传改为Base64格式传递
-// ==============================================
 async function submitOrderSecure() {
     if (isSubmitting) { showAlert('正在提交，请勿重复'); return; }
     if (!hasUploadedScreenshot) { showAlert('请上传截图'); return; }
@@ -1098,7 +1117,6 @@ async function submitOrderSecure() {
             return; 
         }
 
-        // 组装车次信息
         let carList = [];
         let total = 0;
         
@@ -1108,17 +1126,14 @@ async function submitOrderSecure() {
           const sels = document.getElementById(`school${t}`).querySelectorAll('select');
           let info = { name };
           
-          // 计算价格
           let price = 0;
           if (t === '5' || t === '6') {
-            // 中午考点更换 - 固定1元
             price = 1;
             if (sels.length === 2) { 
               info.from = sels[0].value.trim(); 
               info.to = sels[1].value.trim(); 
             }
           } else {
-            // 早送/晚接 - 根据学校计算价格
             if (sels.length === 1) {
               const school = sels[0].value.trim();
               info.school = school;
@@ -1133,7 +1148,6 @@ async function submitOrderSecure() {
           carList.push(info);
         });
 
-        // 1. 提交订单（原有逻辑不变）
         const orderRes = await fetch(`${SERVER_URL}/api/submitOrder`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -1153,14 +1167,12 @@ async function submitOrderSecure() {
             return; 
         }
 
-        // ✅ 核心修改：精准提示 - 区分首次提交/合并提交
         if (orderData.msg.includes('合并到原有订单')) {
             showAlert("提交成功！您已提交过信息，本次内容已合并更新到原有订单中");
         } else {
             showAlert("提交成功！您的订单已创建");
         }
 
-        // 2. 将截图文件转为Base64数组（核心修改）
         const screenshotBase64List = [];
         for (const file of screenshotFiles) {
             const base64 = await new Promise((resolve) => {
@@ -1171,7 +1183,6 @@ async function submitOrderSecure() {
             screenshotBase64List.push(base64);
         }
 
-        // 3. 上传Base64格式的截图（适配后端接口）
         const uploadRes = await fetch(`${SERVER_URL}/api/uploadScreenshot`, { 
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -1187,10 +1198,8 @@ async function submitOrderSecure() {
             return;
         }
 
-        // 提交成功，展示结果
         document.getElementById('screenshotModal').style.display = 'none';
         
-        // ✅ 核心修复：根据提交类型显示不同的班次信息
         let info = `
 <strong>乘车人：</strong>${name}<br>
 <strong>电话：</strong>${phone.replace(/(\d{3})\d{4}(\d{4})/,'$1****$2')}<br>
@@ -1200,12 +1209,8 @@ async function submitOrderSecure() {
 <strong>提交时间：</strong>${createTime}<br>`;
         
         if (orderData.msg.includes('合并到原有订单')) {
-            // ✅ 多次提交/追加：显示"已选班次"（所有历史已有班次）和"新增班次"（本次新增班次）
+            const existingCars = existedCarList;
             
-            // 🔥 修复：获取所有历史已有班次（完整的班次信息）
-            const existingCars = existedCarList; // 使用保存的历史班次完整信息
-            
-            // 获取本次新增的班次（本次提交的班次中，不在历史班次中的）
             const newCars = [];
             carList.forEach(item => {
                 if (!existedCarNames.includes(item.name)) {
@@ -1213,38 +1218,35 @@ async function submitOrderSecure() {
                 }
             });
             
-            // 显示"已选班次"（历史已有班次）
             if (existingCars.length > 0) {
                 info += `<strong>已选班次：</strong><br>`;
                 FIXED_CAR_ORDER.forEach(n => {
                     const item = existingCars.find(i=>i.name===n);
                     if(item) {
-                        info += `- ${item.name}<br>`;  // 修复1：去掉价格显示
+                        info += `- ${item.name}<br>`;
                         if(item.school) info += `　学校：${item.school}<br>`;
                         if(item.from && item.to) info += `　${item.from}→${item.to}<br>`;
                     }
                 });
             }
             
-            // 显示"新增班次"（本次新增的班次）
             if (newCars.length > 0) {
                 info += `<strong>新增班次：</strong><br>`;
                 FIXED_CAR_ORDER.forEach(n => {
                     const item = newCars.find(i=>i.name===n);
                     if(item) {
-                        info += `- ${item.name}<br>`;  // 修复1：去掉价格显示
+                        info += `- ${item.name}<br>`;
                         if(item.school) info += `　学校：${item.school}<br>`;
                         if(item.from && item.to) info += `　${item.from}→${item.to}<br>`;
                     }
                 });
             }
         } else {
-            // ✅ 首次提交：只显示"已选班次"
             info += `<strong>已选班次：</strong><br>`;
             FIXED_CAR_ORDER.forEach(n => {
                 const item = carList.find(i=>i.name===n);
                 if(item) {
-                    info += `- ${item.name}<br>`;  // 修复1：去掉价格显示
+                    info += `- ${item.name}<br>`;
                     if(item.school) info += `　学校：${item.school}<br>`;
                     if(item.from && item.to) info += `　${item.from}→${item.to}<br>`;
                 }
@@ -1254,7 +1256,6 @@ async function submitOrderSecure() {
         document.getElementById('successInfo').innerHTML = info;
         document.getElementById('successModal').style.display = 'flex';
         
-        // 清空缓存，重新加载历史（禁用已选班次）
         clearFormCache();
         loadUserHistory();
     } catch (e) {
@@ -1300,7 +1301,7 @@ function searchPayInfo(){
             FIXED_CAR_ORDER.forEach(n => {
                 const c = item.carList.find(i=>i.name===n);
                 if(c) {
-                    html += `- ${c.name}<br>`;  // 修复2：去掉价格显示
+                    html += `- ${c.name}<br>`;
                     if(c.school) html += `　学校：${c.school}<br>`;
                     if(c.from&&c.to) html += `　${c.from}→${c.to}<br>`;
                 }
