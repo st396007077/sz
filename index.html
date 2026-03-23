@@ -1077,6 +1077,7 @@ function openScreenshotModal() {
 function backToQRModal() {
     document.getElementById('screenshotModal').style.display = 'none';
     document.getElementById('qrModal').style.display = 'flex';
+    updatePayExampleImg(); // 打开弹窗时更新示例图
     saveFormData();
 }
 
