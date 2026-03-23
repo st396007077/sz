@@ -1204,11 +1204,14 @@ async function submitOrderSecure() {
 
         document.getElementById('screenshotModal').style.display = 'none';
         
+        // ✅ 核心修复：从后端获取【合并后的总金额】，替换前端本次计算的金额
+        const realTotal = orderData.total; // 后端返回的累加总金额
+        
         let info = `
 <strong>乘车人：</strong>${name}<br>
 <strong>电话：</strong>${phone.replace(/(\d{3})\d{4}(\d{4})/,'$1****$2')}<br>
 <strong>支付方式：</strong>${selectedPayType}<br>
-<strong>总费用：</strong>${total} 元<br>
+<strong>总费用：</strong>${realTotal} 元<br> <!-- 这里显示正确的累加金额 -->
 <strong>订单号：</strong>${orderData.orderId}<br>
 <strong>提交时间：</strong>${createTime}<br>`;
         
