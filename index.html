@@ -415,11 +415,11 @@ font-size: 15px;
 
 <div class="car-item">
 <div class="car-item-header">
-<input type="checkbox" class="car-check" value="20" data-type="1" data-name="4月11日早送" onchange="checkSchoolError(this); saveFormData()">
-<span>4月11日早送（20元）</span>
+<input type="checkbox" class="car-check" data-type="1" data-name="4月11日早送" onchange="checkSchoolError(this); saveFormData()">
+<span>4月11日早送</span>
 </div>
 <div class="school-select" id="school1">
-<select class="school-select-input" data-type="1" onchange="this.closest('.school-select').querySelector('.error-tip').style.display='none';saveFormData()">
+<select class="school-select-input" data-type="1" onchange="this.closest('.school-select').querySelector('.error-tip').style.display='none';calcTotal();saveFormData()">
 <option value="">请选择到达学校</option>
 <option>绣水中学</option>
 <option>实验小学</option>
@@ -434,11 +434,11 @@ font-size: 15px;
 
 <div class="car-item">
 <div class="car-item-header">
-<input type="checkbox" class="car-check" value="20" data-type="2" data-name="4月11日晚接" onchange="checkSchoolError(this); saveFormData()">
-<span>4月11日晚接（20元）</span>
+<input type="checkbox" class="car-check" data-type="2" data-name="4月11日晚接" onchange="checkSchoolError(this); saveFormData()">
+<span>4月11日晚接</span>
 </div>
 <div class="school-select" id="school2">
-<select class="school-select-input" data-type="2" onchange="this.closest('.school-select').querySelector('.error-tip').style.display='none';saveFormData()">
+<select class="school-select-input" data-type="2" onchange="this.closest('.school-select').querySelector('.error-tip').style.display='none';calcTotal();saveFormData()">
 <option value="">请选择出发学校</option>
 <option>绣水中学</option>
 <option>实验小学</option>
@@ -453,11 +453,11 @@ font-size: 15px;
 
 <div class="car-item">
 <div class="car-item-header">
-<input type="checkbox" class="car-check" value="20" data-type="3" data-name="4月12日早送" onchange="checkSchoolError(this); saveFormData()">
-<span>4月12日早送（20元）</span>
+<input type="checkbox" class="car-check" data-type="3" data-name="4月12日早送" onchange="checkSchoolError(this); saveFormData()">
+<span>4月12日早送</span>
 </div>
 <div class="school-select" id="school3">
-<select class="school-select-input" data-type="3" onchange="this.closest('.school-select').querySelector('.error-tip').style.display='none';saveFormData()">
+<select class="school-select-input" data-type="3" onchange="this.closest('.school-select').querySelector('.error-tip').style.display='none';calcTotal();saveFormData()">
 <option value="">请选择到达学校</option>
 <option>绣水中学</option>
 <option>实验小学</option>
@@ -472,11 +472,11 @@ font-size: 15px;
 
 <div class="car-item">
 <div class="car-item-header">
-<input type="checkbox" class="car-check" value="20" data-type="4" data-name="4月12日晚接" onchange="checkSchoolError(this); saveFormData()">
-<span>4月12日晚接（20元）</span>
+<input type="checkbox" class="car-check" data-type="4" data-name="4月12日晚接" onchange="checkSchoolError(this); saveFormData()">
+<span>4月12日晚接</span>
 </div>
 <div class="school-select" id="school4">
-<select class="school-select-input" data-type="4" onchange="this.closest('.school-select').querySelector('.error-tip').style.display='none';saveFormData()">
+<select class="school-select-input" data-type="4" onchange="this.closest('.school-select').querySelector('.error-tip').style.display='none';calcTotal();saveFormData()">
 <option value="">请选择出发学校</option>
 <option>绣水中学</option>
 <option>实验小学</option>
@@ -491,8 +491,8 @@ font-size: 15px;
 
 <div class="car-item">
 <div class="car-item-header">
-<input type="checkbox" class="car-check" value="3" data-type="5" data-name="4月11日中午考点更换" onchange="checkSchoolError(this); saveFormData()">
-<span>4月11日中午考点更换（3元）</span>
+<input type="checkbox" class="car-check" data-type="5" data-name="4月11日中午考点更换" onchange="checkSchoolError(this); saveFormData()">
+<span>4月11日中午考点更换</span>
 </div>
 <div class="school-select" id="school5">
 <select class="school-select-input" data-type="5" style="margin-bottom:8px" onchange="this.closest('.school-select').querySelector('.error-tip').style.display='none';saveFormData()">
@@ -519,8 +519,8 @@ font-size: 15px;
 
 <div class="car-item">
 <div class="car-item-header">
-<input type="checkbox" class="car-check" value="3" data-type="6" data-name="4月12日中午考点更换" onchange="checkSchoolError(this); saveFormData()">
-<span>4月12日中午考点更换（3元）</span>
+<input type="checkbox" class="car-check" data-type="6" data-name="4月12日中午考点更换" onchange="checkSchoolError(this); saveFormData()">
+<span>4月12日中午考点更换</span>
 </div>
 <div class="school-select" id="school6">
 <select class="school-select-input" data-type="6" style="margin-bottom:8px" onchange="this.closest('.school-select').querySelector('.error-tip').style.display='none';saveFormData()">
@@ -648,6 +648,19 @@ const FIXED_CAR_ORDER = [
 '4月11日中午考点更换','4月12日中午考点更换'
 ];
 
+// 学校价格配置
+const SCHOOL_PRICE = {
+  '绣水中学': 15,      // 绣水中学价格：15元
+  '章丘实验小学': 15,      // 章丘实验小学价格：15元
+  '章丘实验中学': 15,      // 章丘实验中学价格：15元
+  '章丘实验中学': 15,      // 章丘实验中学价格：15元
+  '章丘第二实验中学': 15,  // 章丘第二实验中学价格：15元
+  '章丘鲁能实验小学': 15,  // 章丘鲁能实验小学价格：15元
+  '中等职业学校': 15,   // 中等职业学校价格：15元
+  '济南六里山小学': 17,   // 济南六里山小学价格：17元
+  '济南槐荫中学': 17,   // 济南槐荫中学价格：17元
+  '济南育贤中学': 17,   // 济南育贤中学价格：17元
+};
 
 // 选择学校后，只隐藏当前项的红色错误
 function checkSchoolError(select) {
@@ -907,10 +920,37 @@ function checkSchoolSelected(){
 }
 
 function calcTotal(){
-    let t = 0;
-    document.querySelectorAll('.car-check:checked').forEach(i => t += Number(i.value));
-    document.getElementById('totalPrice').innerText = t;
-    return t;
+  let total = 0;
+  
+  // 遍历所有选中的班次
+  document.querySelectorAll('.car-check:checked').forEach(item => {
+    const type = item.dataset.type;
+    const name = item.dataset.name;
+    const schoolSelect = document.getElementById(`school${type}`);
+    
+    if (schoolSelect) {
+      // 获取学校选择下拉框
+      const schoolSelectElements = schoolSelect.querySelectorAll('select');
+      
+      // 判断班次类型
+      if (type === '5' || type === '6') {
+        // 中午考点更换 - 固定1元
+        total += 1;
+      } else {
+        // 早送/晚接 - 根据学校计算价格
+        // 只有一个下拉框的情况
+        if (schoolSelectElements.length === 1) {
+          const school = schoolSelectElements[0].value;
+          if (school && SCHOOL_PRICE[school]) {
+            total += SCHOOL_PRICE[school];
+          }
+        }
+      }
+    }
+  });
+  
+  document.getElementById('totalPrice').innerText = total;
+  return total;
 }
 
 function openPayModal(){
@@ -977,7 +1017,6 @@ async function submitOrderSecure() {
     try {
         const name = document.getElementById('userName').value.trim();
         const phone = document.getElementById('userPhone').value.trim();
-        const total = calcTotal();
         const createTime = getCurrentTime();
         if (!validateName(name) || !validatePhone(phone)) { 
             showAlert('信息不正确'); 
@@ -987,18 +1026,37 @@ async function submitOrderSecure() {
 
         // 组装车次信息
         let carList = [];
+        let total = 0;
+        
         document.querySelectorAll('.car-check:checked').forEach(item => {
-            const t = item.dataset.type;
-            const name = item.dataset.name;
-            const price = item.value;
-            const sels = document.getElementById(`school${t}`).querySelectorAll('select');
-            let info = { name, price };
-            if (sels.length ===1) info.school = sels[0].value.trim();
-            if (sels.length ===2) { 
-                info.from = sels[0].value.trim(); 
-                info.to = sels[1].value.trim(); 
+          const t = item.dataset.type;
+          const name = item.dataset.name;
+          const sels = document.getElementById(`school${t}`).querySelectorAll('select');
+          let info = { name };
+          
+          // 计算价格
+          let price = 0;
+          if (t === '5' || t === '6') {
+            // 中午考点更换 - 固定1元
+            price = 1;
+            if (sels.length === 2) { 
+              info.from = sels[0].value.trim(); 
+              info.to = sels[1].value.trim(); 
             }
-            carList.push(info);
+          } else {
+            // 早送/晚接 - 根据学校计算价格
+            if (sels.length === 1) {
+              const school = sels[0].value.trim();
+              info.school = school;
+              if (school && SCHOOL_PRICE[school]) {
+                price = SCHOOL_PRICE[school];
+              }
+            }
+          }
+          
+          info.price = price;
+          total += price;
+          carList.push(info);
         });
 
         // 1. 提交订单（原有逻辑不变）
@@ -1087,7 +1145,7 @@ async function submitOrderSecure() {
                 FIXED_CAR_ORDER.forEach(n => {
                     const item = existingCars.find(i=>i.name===n);
                     if(item) {
-                        info += `- ${item.name}<br>`;
+                        info += `- ${item.name} (${item.price}元)<br>`;
                         if(item.school) info += `　学校：${item.school}<br>`;
                         if(item.from && item.to) info += `　${item.from}→${item.to}<br>`;
                     }
@@ -1100,7 +1158,7 @@ async function submitOrderSecure() {
                 FIXED_CAR_ORDER.forEach(n => {
                     const item = newCars.find(i=>i.name===n);
                     if(item) {
-                        info += `- ${item.name}<br>`;
+                        info += `- ${item.name} (${item.price}元)<br>`;
                         if(item.school) info += `　学校：${item.school}<br>`;
                         if(item.from && item.to) info += `　${item.from}→${item.to}<br>`;
                     }
@@ -1112,7 +1170,7 @@ async function submitOrderSecure() {
             FIXED_CAR_ORDER.forEach(n => {
                 const item = carList.find(i=>i.name===n);
                 if(item) {
-                    info += `- ${item.name}<br>`;
+                    info += `- ${item.name} (${item.price}元)<br>`;
                     if(item.school) info += `　学校：${item.school}<br>`;
                     if(item.from && item.to) info += `　${item.from}→${item.to}<br>`;
                 }
@@ -1168,7 +1226,7 @@ function searchPayInfo(){
             FIXED_CAR_ORDER.forEach(n => {
                 const c = item.carList.find(i=>i.name===n);
                 if(c) {
-                    html += `- ${c.name}<br>`;
+                    html += `- ${c.name} (${c.price}元)<br>`;
                     if(c.school) html += `　学校：${c.school}<br>`;
                     if(c.from&&c.to) html += `　${c.from}→${c.to}<br>`;
                 }
