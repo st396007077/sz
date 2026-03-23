@@ -1204,8 +1204,8 @@ async function submitOrderSecure() {
 
         document.getElementById('screenshotModal').style.display = 'none';
         
-        // ✅ 核心修复：从后端获取【合并后的总金额】，替换前端本次计算的金额
-        const realTotal = orderData.total; // 后端返回的累加总金额
+        // 🔥 修复：直接使用前端计算的正确总金额，解决undefined问题
+        const realTotal = total; 
         
         let info = `
 <strong>乘车人：</strong>${name}<br>
