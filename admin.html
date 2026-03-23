@@ -417,8 +417,9 @@ async function load() {
         // 合并班次列表
         const mergedCarList = mergeCarLists([], orders.flatMap(o => o.carList || []));
         
-        // 计算合并后的实际总金额
-        const realTotal = calculateRealTotal(mergedCarList);
+        // 🔥 修复：使用订单的实际总金额，而不是重新计算
+        // 从最新订单中获取总金额
+        const latestTotal = latestOrder.total || 0;
         
         // ✅ 修复：检查是否任何一个订单被手动修改过
         const hasManualModification = orders.some(o => o.isManuallyModified);
@@ -429,7 +430,7 @@ async function load() {
           userName: latestOrder.userName,
           userPhone: latestOrder.userPhone,
           payType: latestOrder.payType,
-          total: realTotal, // 使用计算后的实际总金额
+          total: latestTotal, // 🔥 使用订单的实际总金额
           carList: mergedCarList,
           createTime: latestOrder.createTime,
           paymentRecords: orders.flatMap(o => o.paymentRecords || []),
