@@ -319,6 +319,8 @@ object-fit: cover;
 border-radius: 6px;
 border: 1px solid #ddd;
 cursor: zoom-in;
+/* 强制缩略图显示，覆盖全局透明样式 */
+opacity: 1 !important;
 }
 .del-img-btn {
 position: absolute;
@@ -939,6 +941,8 @@ function renderAllPreviews() {
             const img = document.createElement('img');
             img.src = e.target.result;
             img.className = 'preview-img';
+            // 图片加载完成后添加loaded类，兼容原有动画
+            img.onload = function() { this.classList.add('loaded'); };
             img.onclick = () => openImgZoom(e.target.result);
             const delBtn = document.createElement('div');
             delBtn.className = 'del-img-btn';
