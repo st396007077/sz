@@ -258,13 +258,13 @@ function calculateRealTotal(carList) {
       if (item.name && item.name.includes('中午考点更换')) {
         // 中午考点更换固定1元
         total += 1;
-      } else if (item.school && SCHOOL_PRICE[item.school]) {
+      } else if (item.school && SCHOOL_PRICE.hasOwnProperty(item.school)) { // 🔧 修复
         // 早送/晚接根据学校计算价格
         total += SCHOOL_PRICE[item.school];
       } else if (item.from && item.to) {
         // 中午考点更换有两个学校的情况，取较高价格
-        const fromPrice = SCHOOL_PRICE[item.from] || 0;
-        const toPrice = SCHOOL_PRICE[item.to] || 0;
+        const fromPrice = SCHOOL_PRICE.hasOwnProperty(item.from) ? SCHOOL_PRICE[item.from] : 0; // 🔧 修复
+        const toPrice = SCHOOL_PRICE.hasOwnProperty(item.to) ? SCHOOL_PRICE[item.to] : 0; // 🔧 修复
         total += Math.max(fromPrice, toPrice, 1); // 至少1元
       }
     }
@@ -321,12 +321,12 @@ function mergeCarLists(oldList, newList) {
       if (!car.price && car.price !== 0) {
         if (car.name.includes('中午考点更换')) {
           car.price = 1;
-        } else if (car.school && SCHOOL_PRICE[car.school]) {
+        } else if (car.school && SCHOOL_PRICE.hasOwnProperty(car.school)) { // 🔧 修复
           car.price = SCHOOL_PRICE[car.school];
-        } else if (car.from && car.to) {
+        } else if (car.from && car.to) { // 🔧 修复：item.to 改为 car.to
           // 中午考点更换有两个学校的情况
-          const fromPrice = SCHOOL_PRICE[car.from] || 0;
-          const toPrice = SCHOOL_PRICE[car.to] || 0;
+          const fromPrice = SCHOOL_PRICE.hasOwnProperty(car.from) ? SCHOOL_PRICE[car.from] : 0; // 🔧 修复
+          const toPrice = SCHOOL_PRICE.hasOwnProperty(car.to) ? SCHOOL_PRICE[car.to] : 0; // 🔧 修复
           car.price = Math.max(fromPrice, toPrice, 1);
         }
       }
@@ -341,12 +341,12 @@ function mergeCarLists(oldList, newList) {
       if (!car.price && car.price !== 0) {
         if (car.name.includes('中午考点更换')) {
           car.price = 1;
-        } else if (car.school && SCHOOL_PRICE[car.school]) {
+        } else if (car.school && SCHOOL_PRICE.hasOwnProperty(car.school)) { // 🔧 修复
           car.price = SCHOOL_PRICE[car.school];
-        } else if (car.from && car.to) {
+        } else if (car.from && car.to) { // 🔧 修复：item.to 改为 car.to
           // 中午考点更换有两个学校的情况
-          const fromPrice = SCHOOL_PRICE[car.from] || 0;
-          const toPrice = SCHOOL_PRICE[car.to] || 0;
+          const fromPrice = SCHOOL_PRICE.hasOwnProperty(car.from) ? SCHOOL_PRICE[car.from] : 0; // 🔧 修复
+          const toPrice = SCHOOL_PRICE.hasOwnProperty(car.to) ? SCHOOL_PRICE[car.to] : 0; // 🔧 修复
           car.price = Math.max(fromPrice, toPrice, 1);
         }
       }
@@ -596,11 +596,11 @@ async function submitModifyOrder() {
         // 如果没有price字段，根据学校计算
         if (item.name && item.name.includes('中午考点更换')) {
           item.price = 1;
-        } else if (item.school && SCHOOL_PRICE[item.school]) {
+        } else if (item.school && SCHOOL_PRICE.hasOwnProperty(item.school)) { // 🔧 修复
           item.price = SCHOOL_PRICE[item.school];
         } else if (item.from && item.to) {
-          const fromPrice = SCHOOL_PRICE[item.from] || 0;
-          const toPrice = SCHOOL_PRICE[item.to] || 0;
+          const fromPrice = SCHOOL_PRICE.hasOwnProperty(item.from) ? SCHOOL_PRICE[item.from] : 0; // 🔧 修复
+          const toPrice = SCHOOL_PRICE.hasOwnProperty(item.to) ? SCHOOL_PRICE[item.to] : 0; // 🔧 修复
           item.price = Math.max(fromPrice, toPrice, 1);
         }
       }
