@@ -256,7 +256,7 @@ function calculateRealTotal(carList) {
     } else {
       // 否则根据学校计算价格
       if (item.name && item.name.includes('中午考点更换')) {
-        // 中午考点更换固定3元
+        // 中午考点更换固定1元
         total += 1;
       } else if (item.school && SCHOOL_PRICE[item.school]) {
         // 早送/晚接根据学校计算价格
@@ -265,7 +265,7 @@ function calculateRealTotal(carList) {
         // 中午考点更换有两个学校的情况，取较高价格
         const fromPrice = SCHOOL_PRICE[item.from] || 0;
         const toPrice = SCHOOL_PRICE[item.to] || 0;
-        total += Math.max(fromPrice, toPrice, 1); // 至少3元
+        total += Math.max(fromPrice, toPrice, 1); // 至少1元
       }
     }
   });
