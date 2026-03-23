@@ -539,7 +539,7 @@ function renderTable() {
      <td>${getClassInfo('4月11日中午考点更换')}</td>
      <td>${getClassInfo('4月12日中午考点更换')}</td>
      <td>
-       <button class="refresh-amount-btn" onclick="refreshAmount('${order.orderId}')">刷新金额</button>
+       <button class="refresh-amount-btn" onclick="refreshAmount('${order._id}')">刷新金额</button>
        <button class="modify-btn" onclick="openModifyModal('${order._id}', '${order.orderId}')">修改</button>
        <button class="del-btn" onclick="deleteOrder('${order._id}')">删除</button>
      </td>
