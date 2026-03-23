@@ -502,11 +502,11 @@ function renderTable() {
       
       let info = '';
       if (item.school) {
-        info = `${item.school} (${item.price || 0}元)`;
+        info = `${item.school}`;  // 修复2：只显示学校，不显示价格
       } else if (item.from && item.to) {
-        info = `${item.from}→${item.to} (${item.price || 0}元)`;
+        info = `${item.from}→${item.to}`;  // 修复2：只显示学校，不显示价格
       } else {
-        info = `- (${item.price || 0}元)`;
+        info = `-`;
       }
       return info;
     };
@@ -647,8 +647,17 @@ async function refreshAmount(orderId) {
       method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ pwd:ADMIN_PWD, orderId })
     });
     const d = await r.json();
-    hideLoading();showModal('结果',d.msg);if(d.code===0) load();
-  }catch(e){ hideLoading();showModal('错误','刷新失败'); }
+    hideLoading();
+    if(d.code===0) {
+      showModal('结果', d.msg);
+      load(); // 重新加载数据
+    } else {
+      showModal('错误', d.msg || '刷新失败');
+    }
+  }catch(e){ 
+    hideLoading();
+    showModal('错误','刷新失败：网络异常');
+  }
 }
 
 async function deleteOrder(id) {
@@ -703,11 +712,11 @@ function exportExcel() {
         if (!i) return '-';
         let info = '';
         if (i.school) {
-          info = `${i.school} (${i.price || 0}元)`;
+          info = `${i.school}`;  // 修复2：只显示学校，不显示价格
         } else if (i.from && i.to) {
-          info = `${i.from}→${i.to} (${i.price || 0}元)`;
+          info = `${i.from}→${i.to}`;  // 修复2：只显示学校，不显示价格
         } else {
-          info = `- (${i.price || 0}元)`;
+          info = `-`;
         }
         return info;
       };
