@@ -611,6 +611,12 @@ font-size: 15px;
 <h3>提交支付截图</h3>
 <p style="margin:15px 0;">请上传支付成功的截图凭证，点击"确认提交"后等待几秒自动显示班次信息</p>
 
+<!-- 修复3：添加示例图 -->
+<div id="exampleImageContainer" style="margin: 15px 0; text-align: center;">
+  <p style="font-size: 14px; color: #666; margin-bottom: 5px;">示例样图</p>
+  <img id="exampleImage" src="" style="max-width: 200px; max-height: 200px; border-radius: 6px; border: 1px solid #ddd;">
+</div>
+
 <div class="preview-container" id="previewContainer"></div>
 
 <input type="file" id="screenshotInput" accept="image/*" multiple onchange="previewScreenshot()">
@@ -772,11 +778,11 @@ function loadFormData() {
             const tip = document.getElementById('payTip');
             if (selectedPayType === '微信') {
                 title.innerText = `微信收款码 | 需支付：${total} 元`;
-                img.src = 'https://st396007077.github.io/sqy.github.io/images/WX.png';
+                img.src = 'https://st396007077.github.io/sz/images/WX.png';
                 tip.innerText = '请保存二维码到微信扫码完成支付';
             } else if (selectedPayType === '支付宝') {
                 title.innerText = `支付宝收款码 | 需支付：${total} 元`;
-                img.src = 'https://st396007077.github.io/sqy.github.io/images/ZFB.jpg';
+                img.src = 'https://st396007077.github.io/sz/images/ZFB.jpg';
                 tip.innerText = '请保存二维码到支付宝扫码完成支付';
             }
             m.style.display = 'flex';
@@ -1021,6 +1027,15 @@ function openScreenshotModal() {
     document.getElementById('previewContainer').innerHTML = '';
     document.getElementById('qrModal').style.display = 'none';
     document.getElementById('screenshotModal').style.display = 'flex';
+    
+    // 修复3：设置示例图
+    const exampleImage = document.getElementById('exampleImage');
+    if (selectedPayType === '微信') {
+        exampleImage.src = 'https://st396007077.github.io/sqy.github.io/images/WXFK.jpg';
+    } else if (selectedPayType === '支付宝') {
+        exampleImage.src = 'https://st396007077.github.io/sqy.github.io/images/ZFBFK.jpg';
+    }
+    
     saveFormData();
 }
 
@@ -1168,7 +1183,7 @@ async function submitOrderSecure() {
                 FIXED_CAR_ORDER.forEach(n => {
                     const item = existingCars.find(i=>i.name===n);
                     if(item) {
-                        info += `- ${item.name} (${item.price}元)<br>`;
+                        info += `- ${item.name}<br>`;  // 修复1：去掉价格显示
                         if(item.school) info += `　学校：${item.school}<br>`;
                         if(item.from && item.to) info += `　${item.from}→${item.to}<br>`;
                     }
@@ -1181,7 +1196,7 @@ async function submitOrderSecure() {
                 FIXED_CAR_ORDER.forEach(n => {
                     const item = newCars.find(i=>i.name===n);
                     if(item) {
-                        info += `- ${item.name} (${item.price}元)<br>`;
+                        info += `- ${item.name}<br>`;  // 修复1：去掉价格显示
                         if(item.school) info += `　学校：${item.school}<br>`;
                         if(item.from && item.to) info += `　${item.from}→${item.to}<br>`;
                     }
@@ -1193,7 +1208,7 @@ async function submitOrderSecure() {
             FIXED_CAR_ORDER.forEach(n => {
                 const item = carList.find(i=>i.name===n);
                 if(item) {
-                    info += `- ${item.name} (${item.price}元)<br>`;
+                    info += `- ${item.name}<br>`;  // 修复1：去掉价格显示
                     if(item.school) info += `　学校：${item.school}<br>`;
                     if(item.from && item.to) info += `　${item.from}→${item.to}<br>`;
                 }
@@ -1249,7 +1264,7 @@ function searchPayInfo(){
             FIXED_CAR_ORDER.forEach(n => {
                 const c = item.carList.find(i=>i.name===n);
                 if(c) {
-                    html += `- ${c.name} (${c.price}元)<br>`;
+                    html += `- ${c.name}<br>`;  // 修复2：去掉价格显示
                     if(c.school) html += `　学校：${c.school}<br>`;
                     if(c.from&&c.to) html += `　${c.from}→${c.to}<br>`;
                 }
